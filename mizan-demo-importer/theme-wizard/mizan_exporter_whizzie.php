@@ -16,6 +16,11 @@ class Mizan_Importer_ThemeWhizzie {
     /** @var string Wizard page slug and title. */
     protected $page_slug = '';
     protected $page_title = '';
+
+    protected $page_heading = '';
+    protected $plugin_path = '';
+    protected $parent_slug = '';
+
     /** @var array Wizard steps set by user. */
     protected $config_steps = array();
     /**

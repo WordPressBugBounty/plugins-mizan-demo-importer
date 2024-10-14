@@ -3,7 +3,7 @@
   Plugin Name:       Mizan Demo Importer
   Plugin URI:        
   Description:       This plugin helps to import demo content using elementor.
-  Version:           0.0.6
+  Version:           0.0.7
   Requires at least: 5.2
   Requires PHP:      7.2
   Author:            mizanthemes
