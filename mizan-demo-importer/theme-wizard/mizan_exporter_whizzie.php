@@ -100,9 +100,8 @@ class Mizan_Importer_ThemeWhizzie {
         $this->plugin_path = trailingslashit(dirname(__FILE__));
         $relative_url = str_replace(get_template_directory(), '', $this->plugin_path);
         $this->plugin_url = trailingslashit(get_template_directory_uri() . $relative_url);
-        $current_plugin = get_plugin_data(MDI_FILE);
-        $this->plugin_title = $current_plugin['Name'];
-        $this->plugin_name = strtolower(preg_replace('#[^a-zA-Z]#', '', $current_plugin['Name']));
+        $this->plugin_title = MDI_NAME;
+        $this->plugin_name = strtolower(preg_replace('#[^a-zA-Z]#', '', MDI_NAME));
         $this->page_slug = apply_filters($this->plugin_name . '_theme_setup_wizard_page_slug', $this->plugin_name . '-wizard');
         $this->parent_slug = apply_filters($this->plugin_name . '_theme_setup_wizard_parent_slug', '');
     }

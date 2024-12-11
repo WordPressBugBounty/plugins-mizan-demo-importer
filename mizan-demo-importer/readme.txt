@@ -2,9 +2,9 @@
 Contributors: mizanthemes
 Tags: website builder, One click demo Import, templates
 Requires at least: 5.2
-Tested up to: 6.5.3
+Tested up to: 6.7.1
 Requires PHP: 7.2
-Stable tag: 0.0.7
+Stable tag: 0.0.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,9 @@ This plugin helps to import demo content using elementor.
 * **Updates** - Minor Fixes.
 
 = 0.0.7 - 2024-14-10 =
+* **Updates** - Minor Fixes.
+
+= 0.0.8 - 2024-11-12 =
 * **Updates** - Minor Fixes.
 
 The Mizan Demo Importer bundles the following third-party resources:
