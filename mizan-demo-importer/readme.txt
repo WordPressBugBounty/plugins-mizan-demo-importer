@@ -4,15 +4,31 @@ Tags: website builder, One click demo Import, templates
 Requires at least: 5.2
 Tested up to: 6.7.1
 Requires PHP: 7.2
-Stable tag: 0.0.8
+Stable tag: 0.0.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-You can import free elementor templates
+Easily import demo data for Mizan Themes with one click. Fully Elementor compatible, it sets up plugins, images, content, and settings seamlessly!
 
 == Description ==
 
-This plugin helps to import demo content using elementor.
+The **Mizan Demo Import Plugin** is an indispensable tool for anyone using **Mizan Themes**. This plugin is designed to help you recreate theme demos on your website effortlessly, saving time and ensuring a professional-looking site. Once you install and activate the plugin, it automates the process of importing all demo data, including images, content, custom code, and theme settings.
+
+Fully compatible with **Elementor**, the plugin ensures that your website setup is smooth, even if you’re a beginner. It also installs and activates all necessary plugins automatically, so you don’t need to worry about missing dependencies. Whether you're using free, premium, or bundled Mizan Themes, this plugin is the ultimate tool to bring your site to life.
+
+==Key Features==
+* **Effortless Demo Import:** Import complete theme demo data with a single click.
+* **Full Content Integration:** Brings in images, content, settings, and even custom code
+seamlessly.
+* **Automated Plugin Setup:** Installs and activates all required plugins during the setup
+process.
+* **Elementor Compatible:** Enjoy complete flexibility to edit and customize your site.
+* **Beginner-Friendly:** Simplified interface ensures smooth setup for all users.
+
+==Explore Mizan Themes:==
+* [**Free Themes**](https://www.mizanthemes.com/collections/free-wordpress-themes): Perfect for beginners looking to experiment with professional designs.
+* [**Premium Themes**](https://www.mizanthemes.com/collections/popular-wordpress-themes): Advanced features and designs for serious website creators.
+* [**Theme Bundle**](https://www.mizanthemes.com/products/wp-theme-bundle): Access all premium themes at an unbeatable price.
 
 == Installation ==
 
@@ -29,8 +45,14 @@ This plugin helps to import demo content using elementor.
 
 = Installation =
 
-1. Install using the WordPress built-in Plugin installer, or Extract the zip file and drop the contents in the `wp-content/plugins/` directory of your WordPress installation.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
+1. **Download and Install:**
+Download the Mizan Demo Import plugin from the WordPress Plugin Repository. Navigate to your WordPress dashboard, go to Plugins > Add New, and upload the plugin file. Once uploaded, click “Activate” to enable the plugin.
+2. **Setup Wizard:**
+After activation, the plugin launches a setup wizard. Follow the steps to install all required plugins automatically. The wizard ensures that all dependencies for your theme are properly installed and configured.
+3. **Select and Import Demo Data:**
+Once the setup wizard is complete, select the demo version of your theme from the list provided. Click the **“Import Demo Data”** button, and the plugin will import all content, images, and settings associated with that demo.
+4. **Customize Your Site:**
+After the import is finished, your site will mirror the demo. Open Elementor to tweak the design and customize content to match your brand.
 
 == Changelog ==
 
@@ -53,6 +75,9 @@ This plugin helps to import demo content using elementor.
 * **Updates** - Minor Fixes.
 
 = 0.0.8 - 2024-11-12 =
+* **Updates** - Minor Fixes.
+
+= 0.0.9 - 2024-23-12 =
 * **Updates** - Minor Fixes.
 
 The Mizan Demo Importer bundles the following third-party resources:
