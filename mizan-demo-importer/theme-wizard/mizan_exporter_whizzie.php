@@ -124,6 +124,8 @@ class Mizan_Importer_ThemeWhizzie {
         add_action('wp_ajax_mizan_importer_setup_themes', array($this, 'mizan_importer_setup_themes'));
         add_action('wp_ajax_wz_activate_mizan_importer_pro', array($this, 'wz_activate_mizan_importer_pro'));
         add_action('wp_ajax_mizan_importer_setup_elementor', array($this, 'mizan_importer_setup_elementor'));
+        add_action('wp_ajax_templates_api_category_wise', array($this, 'mizan_importer_pro_templates_api_category_wise'));
+        add_action('wp_ajax_pagination_load_content', array($this, 'pagination_load_content'));
         add_action('admin_enqueue_scripts', array($this, 'mizan_importer_pro_admin_plugin_style'));
     }
     public static function get_the_plugin_key() {
@@ -136,24 +138,36 @@ class Mizan_Importer_ThemeWhizzie {
         }
     }
     public function enqueue_scripts($hook) {
-        if ( $hook == 'toplevel_page_' . $this->page_slug ) {
-          wp_enqueue_style('theme-wizard-style', MDI_URL . 'theme-wizard/assets/css/theme-wizard-style.css');
-          wp_enqueue_script('notify-js', MDI_URL . '/theme-wizard/assets/js/notify.min.js', array('bootstrap-js'));
-          wp_register_script('theme-wizard-script', MDI_URL . 'theme-wizard/assets/js/theme-wizard-script.js', array('jquery'), time());
-          wp_localize_script('theme-wizard-script', 'mizan_importer_pro_whizzie_params', array('ajaxurl' => esc_url(admin_url('admin-ajax.php')), 'wpnonce' => wp_create_nonce('whizzie_nonce'), 'verify_text' => esc_html('verifying', 'mizan-demo-importer')));
-          wp_enqueue_script('theme-wizard-script');
-          wp_localize_script('elementor-exporter-wizard-script', 'mizan_importer_wizard_script_params', array(
-            'ajaxurl' => esc_url(admin_url('admin-ajax.php')),
-            'admin_url' => esc_url(admin_url()),
-            'site_url' => esc_url(site_url()),
-            'wpnonce' => wp_create_nonce('mizan_importer_whizzie_nonce'),
-            'verify_text' => esc_html(' verifying', MIZAN_IMPORTER_TEXT_DOMAIN),
-            'pro_badge' => esc_url(MDI_URL . 'whizzie/assets/img/pro-badge.svg'))
-          );
-          wp_enqueue_script('elementor-exporter-wizard-script');
-          wp_enqueue_script('tabs', MDI_URL . 'theme-wizard/assets/js/tab.js');
-          wp_enqueue_script('wp-notify-popup', MDI_URL . 'theme-wizard/assets/js/notify.min.js');
-        }
+      
+      wp_register_script('theme-wizard-script', MDI_URL . 'theme-wizard/assets/js/theme-wizard-script.js', array('jquery'), time());
+      wp_localize_script('theme-wizard-script', 'mizan_importer_pro_whizzie_params', array('ajaxurl' => esc_url(admin_url('admin-ajax.php')), 'wpnonce' => wp_create_nonce('whizzie_nonce'), 'verify_text' => esc_html('verifying', 'mizan-demo-importer')));
+
+      if ( $hook == 'toplevel_page_' . $this->page_slug ) {
+        wp_enqueue_style('theme-wizard-style', MDI_URL . 'theme-wizard/assets/css/theme-wizard-style.css');
+        wp_enqueue_script('notify-js', MDI_URL . '/theme-wizard/assets/js/notify.min.js', array('bootstrap-js'));
+        wp_enqueue_script('theme-wizard-script');
+        wp_localize_script('elementor-exporter-wizard-script', 'mizan_importer_wizard_script_params', array(
+          'ajaxurl' => esc_url(admin_url('admin-ajax.php')),
+          'admin_url' => esc_url(admin_url()),
+          'site_url' => esc_url(site_url()),
+          'wpnonce' => wp_create_nonce('mizan_importer_whizzie_nonce'),
+          'verify_text' => esc_html(' verifying', MIZAN_IMPORTER_TEXT_DOMAIN),
+          'pro_badge' => esc_url(MDI_URL . 'whizzie/assets/img/pro-badge.svg'))
+        );
+        wp_enqueue_script('elementor-exporter-wizard-script');
+        wp_enqueue_script('tabs', MDI_URL . 'theme-wizard/assets/js/tab.js');
+        wp_enqueue_script('wp-notify-popup', MDI_URL . 'theme-wizard/assets/js/notify.min.js');
+      }
+
+      if ( $hook == 'toplevel_page_elemento-templates' ) {
+        wp_enqueue_script('theme-wizard-script');
+        wp_enqueue_style('theme-wizard-fontawesome', MDI_URL . 'theme-wizard/assets/css/all.min.css');
+        wp_enqueue_style('theme-wizard-style', MDI_URL . 'theme-wizard/assets/css/theme-wizard-style.css');
+        wp_enqueue_style('bootstrap.min.css', MDI_URL . 'assets/css/bootstrap.min.css');
+        wp_enqueue_script('bootstrap.bundle.min.js', MDI_URL . 'assets/js/bootstrap.bundle.min.js');
+        wp_enqueue_script('fontawesome.min.js', MDI_URL . 'theme-wizard/assets/js/all.min.js');
+        wp_enqueue_script('pagination-templates', MDI_URL . 'theme-wizard/assets/js/pagination.js');
+      }
     }
     public static function get_instance() {
         if (!self::$instance) {
@@ -189,7 +203,25 @@ class Mizan_Importer_ThemeWhizzie {
      * Make a modal screen for the wizard
      */
     public function menu_page() {
-        add_menu_page(esc_html($this->page_title), esc_html($this->page_title), 'manage_options', $this->page_slug, array($this, 'mizan_importer_pro_mostrar_guide'), 'dashicons-admin-plugins', 40);
+        add_menu_page(
+          esc_html($this->page_title), 
+          esc_html($this->page_title), 
+          'manage_options', 
+          $this->page_slug, 
+          array($this, 'mizan_importer_pro_mostrar_guide'), 
+          'dashicons-admin-plugins', 
+          40
+        );
+
+        add_menu_page(
+          'Templates', 
+          'Templates', 
+          'manage_options', 
+          'elemento-templates', 
+          array($this, 'mizan_importer_pro_templates'), 
+          'dashicons-admin-page', 
+          40
+        );
     }
     public function activation_page() {
       if(defined('GET_PREMIUM_THEME')){
@@ -624,6 +656,211 @@ class Mizan_Importer_ThemeWhizzie {
            }
          }
        }
+
+       public function mizan_importer_pro_templates_api_category_wise() {
+        
+        $search_val = isset($_POST['search_val']) ? ($_POST['search_val']) : '';
+        $category_handle = isset($_POST['category_handle']) ? $_POST['category_handle'] : '';
+
+        $themes_arr = $this->mizan_importer_pro_templates_api('', $category_handle, $search_val);
+
+        $response = array( 
+          'code' => 200, 
+          'data' => isset($themes_arr['themes']) ? $themes_arr['themes'] : array(),
+          'total_pages' => isset($themes_arr['total_pages']) ? $themes_arr['total_pages'] : 1
+        );
+        wp_send_json( $response );
+        exit;
+      }
+
+      public function mizan_importer_pro_templates_api( $cursor, $category, $search ){
+
+        $endpoint_url = MDI_THEME_LICENCE_ENDPOINT . 'getFilteredProducts';
+
+        $remote_post_data = array(
+          'collectionHandle' => $category,
+          'productHandle' => $search,
+          'paginationParams' => array(
+            "first" => 12,
+            "afterCursor" => $cursor,
+            "beforeCursor" => "",
+            "reverse" => true
+          )
+        );
+
+        $body = wp_json_encode($remote_post_data);
+
+        $options = [
+            'body' => $body,
+            'headers' => [
+                'Content-Type' => 'application/json'
+            ]
+        ];
+        $response = wp_remote_post($endpoint_url, $options);
+
+        $themes_array = array();
+
+        if (!is_wp_error($response)) {
+          
+          $response_body = wp_remote_retrieve_body($response);
+          $response_body = json_decode($response_body);
+          
+          if (isset($response_body->data) && !empty($response_body->data)) {
+            if (isset($response_body->data->products) && !empty($response_body->data->products)) {
+
+              $themes_array['themes'] = $response_body->data->products;
+              $themes_array['total_pages'] = $response_body->data->pageInfo;
+            }            
+          }
+        }
+
+        return $themes_array;
+      }
+
+      public function get_premium_product_categories() {
+
+        $cat_array = array();
+
+        $endpoint_url = MDI_THEME_LICENCE_ENDPOINT . 'getCollections';
+        $options = [
+          'body' => [],
+          'headers' => [
+              'Content-Type' => 'application/json'
+          ]
+        ];
+        $response = wp_remote_post($endpoint_url, $options);
+    
+        if (!is_wp_error($response)) {
+          $response_body = wp_remote_retrieve_body($response);
+          $response_body = json_decode($response_body);
+  
+          if (isset($response_body->data) && !empty($response_body->data)) {
+
+            $cat_array = $response_body->data;
+          }
+        }
+
+        return $cat_array;
+      }
+
+      public function pagination_load_content() {
+        
+        $search_val = isset($_POST['search_val']) ? ($_POST['search_val']) : '';
+        $cursor = isset($_POST['cursor']) ? ($_POST['cursor']) : '';
+        $category_handle = isset($_POST['category_handle']) ? $_POST['category_handle'] : '';
+
+        $themes_arr = $this->mizan_importer_pro_templates_api($cursor, $category_handle, $search_val);
+
+        $response = array( 
+          'code' => 200, 
+          'data' => isset($themes_arr['themes']) ? $themes_arr['themes'] : array(),
+          'total_pages' => isset($themes_arr['total_pages']) ? $themes_arr['total_pages'] : 1
+        );
+        wp_send_json( $response );
+        exit;
+      }
+
+       public function mizan_importer_pro_templates($paged = 1, $category_id = '', $search = '') {
+
+        $product_cat_arr = $this->get_premium_product_categories();
+        $themes_arr = $this->mizan_importer_pro_templates_api($paged, $category_id, $search);        
+        ?>
+        <div class="main-grid-card-overlay"></div>
+        <div class="main-grid-banner-parent">
+          <div class="row my-5 align-items-center">
+            <div class="col-md-10">
+              <h2 class="main-grid-banner-head"><?php echo esc_html('Mizan Themes,'); ?></h2>
+              <p class="main-grid-banner-para"><?php echo esc_html('Explore The Ultimate Collection of Premium Elementor WordPress Themes'); ?></p>
+            </div>
+            <div class="col-md-2">
+              <img class="main-grid-banner-logo img-fluid" src="<?php echo esc_url(MDI_URL . 'theme-wizard/assets/images/banner-logo.png'); ?>" />
+            </div>
+            <div class="col-md-12">
+              <div class="main-grid-banner-coupon-parent">
+                <h3 class="main-grid-banner-coupon-heading"><?php echo esc_html('Get Flat 25% OFF On Premium Themes'); ?></h3>
+                <p class="main-grid-banner-coupon-para"><?php echo esc_html('Use Coupon Code "'); ?><span id="themeCouponCode"><?php echo esc_html('SUNNY25');?></span><?php echo esc_html('" At Check Out'); ?></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="main-grid-card-parent">
+          <div class="main-grid-card-parent-pulse"></div>
+          <div class="main-grid-card row filter-templates my-4">
+            <div class="col-md-6">
+              <div class="dropdown">
+              
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i> <?php echo esc_html('Themes Categories'); ?>
+                </button>
+                <ul class="dropdown-menu">
+                  <li class="d-flex justify-content-space-between align-items-center">
+                      <a class="dropdown-item templates selected p-0" href="#" data-category=""><?php echo esc_html('All'); ?></a>
+                  </li>
+                  <?php foreach ( $product_cat_arr as $key => $single_cat ) {
+                    $count = $single_cat->productsCount;
+
+                    if ( $single_cat->title == 'Uncategorized' || $single_cat->title == 'Free' ) {
+                      continue;
+                    }
+                    ?>
+                    <li class="d-flex justify-content-space-between align-items-center">
+                      <a class="dropdown-item templates p-0" href="#" data-category="<?php echo esc_attr($single_cat->handle);?>"><?php echo esc_html($single_cat->title); ?></a>
+                      <p class="mb-0"><?php echo esc_html($count); ?></p>
+                    </li>
+                  <?php } ?>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="main-grid-search-wrapper position-relative">
+              <input type="text" name="search_themes" class="main-grid-search" placeholder="Search..">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              </div>          
+            </div>
+          </div>
+          <div class="main-grid-card row theme-templates">
+            <?php
+            if (isset($themes_arr['themes'])) {
+              foreach ( $themes_arr['themes'] as $key => $theme ) {
+
+                $product_obj = $theme->node;
+                        
+                if (isset($product_obj->inCollection) && !$product_obj->inCollection) {
+                    continue;
+                }
+
+                $live_demo = isset($theme->node->metafield->value) ? $theme->node->metafield->value : '';
+                $product_permalink = isset($theme->node->onlineStoreUrl) ? $theme->node->onlineStoreUrl : '';
+                $thumbnail_url = isset($theme->node->images->edges[0]->node->src) ? $theme->node->images->edges[0]->node->src : '';
+                $get_the_title = $product_obj->title;
+                ?>
+  
+                <div class="main-grid-card-parent col-lg-4 col-md-6 col-12">
+                  <div class="main-grid-card-parent-inner">
+                    <div class="main-grid-card-parent-inner-image-head">
+                      <img class="main-grid-card-parent-inner-image" src="<?php echo esc_url($thumbnail_url); ?>" width="100" height="100" alt="<?php echo esc_url($get_the_title); ?>">
+                    </div>
+                    <div class="main-grid-card-parent-inner-description">
+                      <h3><?php echo esc_html($get_the_title); ?></h3>
+                      <div class="main-grid-card-parent-inner-button">
+                        <a target="_blank" href="<?php echo esc_url($product_permalink); ?>" class="main-grid-card-parent-inner-button-buy"><?php echo esc_html('Buy Now'); ?></a>
+                        <a target="_blank" href="<?php echo esc_url($live_demo); ?>" class="main-grid-card-parent-inner-button-preview"><?php echo esc_html('Demo'); ?></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <?php }
+            } ?>
+          </div>
+          <?php if($themes_arr['total_pages']->hasNextPage) { ?>
+            <div class="main-grid-card-load-more-parent text-center my-2">
+              <input type="hidden" name="load_more" value="<?php echo esc_attr(isset($themes_arr['total_pages']->endCursor) ? $themes_arr['total_pages']->endCursor : ''); ?>">
+              <button class="btn btn-primary template_pagination"><?php echo esc_html('Load More'); ?></button>
+            </div>
+          <?php } ?>
+        </div>
+      <?php }
+
        // ------------ Activation Close -----------
        public function mizan_importer_pro_mostrar_guide() {
          $display_string = '';

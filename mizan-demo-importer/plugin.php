@@ -3,7 +3,7 @@
   Plugin Name:       Mizan Demo Importer
   Plugin URI:        
   Description:       This plugin helps to import demo content using elementor.
-  Version:           0.0.9
+  Version:           0.1.0
   Requires at least: 5.2
   Requires PHP:      7.2
   Author:            mizanthemes
@@ -37,3 +37,25 @@ define( 'MIZAN_MAIN_URL', "https://preview.mizanthemes.com/" );
 define( 'MDI_NAME', 'Mizan Demo Importer' );
 
 require MDI_DIR .'theme-wizard/config.php';
+
+function mizan_importer_custom_admin_css() {
+  echo '<style>
+    .toplevel_page_elemento-templates a.toplevel_page_elemento-templates {
+        background-color: #93003f !important;
+        border-radius: 3px;
+        color: #fff !important;
+        display: block;
+        font-weight: 600 !important;
+        transition: all .3s;
+    }
+
+    .toplevel_page_elemento-templates a.toplevel_page_elemento-templates .dashicons-admin-page::before {
+        color: white !important;
+    }
+
+    .toplevel_page_elemento-templates a.toplevel_page_elemento-templates .wp-menu-name {
+        font-weight: bold;
+    }
+  </style>';
+}
+add_action('admin_head', 'mizan_importer_custom_admin_css');
