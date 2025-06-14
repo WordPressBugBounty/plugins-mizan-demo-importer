@@ -1047,7 +1047,9 @@ class Mizan_Importer_ThemeWhizzie {
     }
     public function mizan_importer_setup_themes() {
       if (!check_ajax_referer('whizzie_nonce', 'wpnonce') || empty($_POST['slug'])) {
-        wp_send_json_error(array('error' => 1, 'message' => esc_html__('No Slug Found')));
+        //wp_send_json_error(array('error' => 1, 'message' => esc_html__('No Slug Found')));
+        wp_send_json_error(array('error' => 1, 'message' => esc_html__('No Slug Found', 'mizan-demo-importer')));
+
       }
       $json = array();
       // send back some json we use to hit up TGM
@@ -1093,7 +1095,9 @@ class Mizan_Importer_ThemeWhizzie {
         $json['hash'] = md5(serialize($json)); // used for checking if duplicates happen, move to next theme
         wp_send_json($json);
       } else {
-        wp_send_json(array('done' => 1, 'message' => esc_html__('Success')));
+     //   wp_send_json(array('done' => 1, 'message' => esc_html__('Success')));
+        wp_send_json(array('done' => 1, 'message' => esc_html__('Success', 'mizan-demo-importer')));
+
       }
       exit;
     }
