@@ -1,3 +1,6 @@
+.notice {
+    display: none;
+}
 .wee-whizzie-wrap {
     opacity: 0;
     position: relative;
@@ -1082,7 +1085,7 @@ ul.wee-whizzie-nav li.done-step span::before {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.main-grid-card-parent-inner-button a {
+.main-grid-card-parent-inner-button a, .main-grid-card-parent-inner-button .installed-btn {
     padding: 8px 18px;
     border-radius: 34px;
     text-decoration: none;
@@ -1090,6 +1093,7 @@ ul.wee-whizzie-nav li.done-step span::before {
     font-size: 16px;
     font-weight: bolder;
     display: inline-block;
+    cursor: pointer;
 }
 .main-grid-card-parent-inner-button .main-grid-card-parent-inner-button-buy {
     border: 1px solid #000;
@@ -1120,7 +1124,7 @@ ul.wee-whizzie-nav li.done-step span::before {
     object-position: top;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
-.main-grid-card-parent .template_pagination {
+.main-grid-card-parent .template_pagination, .main-grid-card-pagination .pagination-previous-btn, .main-grid-card-pagination .pagination-next-btn {
     padding: 12px 30px;
     border-radius: 34px;
     text-decoration: none;
@@ -1351,3 +1355,82 @@ li:has(> a.dropdown-item.templates.selected) p {
         margin-bottom: 20px;
     }
 }
+
+/* Free theme page css START */
+.main-grid-card-pagination .pagination-previous-btn, .main-grid-card-pagination .pagination-next-btn {
+    align-items: center;
+    justify-content: center;
+    display: inline-flex;
+    gap: 5px;
+    padding: 0px 12px;
+    vertical-align: middle;
+}
+.main-grid-card-parent-inner-description h6 {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 0 16px;
+    margin-bottom: 0;
+}
+.main-grid-card-parent-free-loader{
+    display: none;
+    position: relative;
+    height: 32px;
+    width: 200px;
+    background: #fff;
+    border:2px solid #fff;
+    color: #3A57A6;
+    overflow: hidden;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+}
+.main-grid-card-parent-free-loader::before{
+    content: '';
+    background: #3A57A6;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    animation: loadingfree 10s linear infinite;
+}
+.main-grid-card-parent-free-loader:after{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 24px;
+    line-height: 32px;
+    color: rgb(0,255,255);
+    mix-blend-mode: difference;
+    animation: freepercentage 10s linear infinite;
+}
+@keyframes loadingfree {
+    0% { width: 0 }
+    100% { width: 100% }
+}
+@keyframes freepercentage {
+    0% { content: "0%"}
+    5% { content: "5%"}
+    10% { content: "10%"}
+    20% { content: "20%"}
+    30% { content: "30%"}
+    40% { content: "40%"}
+    50% { content: "50%"}
+    60% { content: "60%"}
+    70% { content: "70%"}
+    80% { content: "80%"}
+    90% { content: "90%"}
+    95% { content: "95%"}
+    96% { content: "96%"}
+    97% { content: "97%"}
+    98% { content: "98%"}
+    99% { content: "99%"}
+    100% { content: "100%"}
+}
+/* Free theme page css END */

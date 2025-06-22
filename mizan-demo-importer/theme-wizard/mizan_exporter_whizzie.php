@@ -118,6 +118,7 @@ class Mizan_Importer_ThemeWhizzie {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('admin_menu', array($this, 'menu_page'));
         add_action('admin_init', array($this, 'get_plugins'), 30);
+        add_action('admin_init', array($this, 'mizan_importer_handle_free_theme_redirect'));
         add_filter('mizan_importer_tgmpa_load', array($this, 'mizan_importer_tgmpa_load'), 10, 1);
         add_action('wp_ajax_setup_plugins', array($this, 'setup_plugins'));
         add_action('wp_ajax_setup_widgets', array($this, 'setup_widgets'));
@@ -125,6 +126,7 @@ class Mizan_Importer_ThemeWhizzie {
         add_action('wp_ajax_wz_activate_mizan_importer_pro', array($this, 'wz_activate_mizan_importer_pro'));
         add_action('wp_ajax_mizan_importer_setup_elementor', array($this, 'mizan_importer_setup_elementor'));
         add_action('wp_ajax_templates_api_category_wise', array($this, 'mizan_importer_pro_templates_api_category_wise'));
+        add_action('wp_ajax_mizan_importer_install_free_theme', array($this, 'mizan_importer_install_and_activate_free_theme'));
         add_action('wp_ajax_pagination_load_content', array($this, 'pagination_load_content'));
         add_action('admin_enqueue_scripts', array($this, 'mizan_importer_pro_admin_plugin_style'));
     }
@@ -159,7 +161,7 @@ class Mizan_Importer_ThemeWhizzie {
         wp_enqueue_script('wp-notify-popup', MDI_URL . 'theme-wizard/assets/js/notify.min.js');
       }
 
-      if ( $hook == 'toplevel_page_elemento-templates' ) {
+      if ( $hook == 'toplevel_page_elemento-templates' || $hook == 'quick-start_page_mizan_importer_pro_free_themes' ) {
         wp_enqueue_script('theme-wizard-script');
         wp_enqueue_style('theme-wizard-fontawesome', MDI_URL . 'theme-wizard/assets/css/all.min.css');
         wp_enqueue_style('theme-wizard-style', MDI_URL . 'theme-wizard/assets/css/theme-wizard-style.css');
@@ -211,6 +213,15 @@ class Mizan_Importer_ThemeWhizzie {
           array($this, 'mizan_importer_pro_mostrar_guide'), 
           'dashicons-admin-plugins', 
           40
+        );
+
+        add_submenu_page(
+            $this->page_slug,
+            'Free Themes',
+            'Our Free Themes',
+            'manage_options',
+            'mizan_importer_pro_free_themes',
+            array($this, 'mizan_importer_pro_free_themes')
         );
 
         add_menu_page(
@@ -267,6 +278,191 @@ class Mizan_Importer_ThemeWhizzie {
       echo "string";
     }
   }
+
+  // new add for free themes 
+    public function mizan_importer_pro_free_themes() {
+
+        $current_page = isset($_GET['theme_page']) ? intval($_GET['theme_page']) : 1;
+        if ($current_page < 1) $current_page = 1;
+        // Prepare API request
+        $url = 'https://api.wordpress.org/themes/info/1.2/';
+        $args = [
+            'action' => 'query_themes',
+            'request[author]' => 'mizanthemes',
+            'request[per_page]' => 12,
+            'request[page]' => $current_page,
+        ];
+        
+        $full_url = add_query_arg($args, $url);
+
+        // Make GET request
+        $response = wp_remote_get($full_url);
+
+        if (is_wp_error($response)) {
+            echo '<div class="notice notice-error"><p>Error fetching themes: ' . esc_html($response->get_error_message()) . '</p></div>';
+            return;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        if ($code !== 200 || empty($body)) {
+            echo '<p>Error finding themes.</p>';
+            return;
+        }
+
+        $data = json_decode($body, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            echo '<p>Error finding themes.</p>';
+            return;
+        }
+
+        $themes = !empty($data['themes']) ? $data['themes'] : [];
+        $total = isset($data['info']['results']) ? intval($data['info']['results']) : 0;
+        $total_pages = isset($data['info']['pages']) ? intval($data['info']['pages']) : 0;
+
+        ?>
+        <div class="main-grid-card-overlay"></div>
+        <div class="main-grid-banner-parent">
+          <div class="row my-5 align-items-center">
+            <div class="col-md-10">
+              <h2 class="main-grid-banner-head"><?php echo esc_html('Mizan Themes,'); ?></h2>
+              <p class="main-grid-banner-para"><?php echo esc_html('Explore The Ultimate Collection of Free Elementor WordPress Themes'); ?></p>
+            </div>
+            <div class="col-md-2">
+              <img class="main-grid-banner-logo img-fluid" src="<?php echo esc_url(MDI_URL . 'theme-wizard/assets/images/banner-logo.png'); ?>" />
+            </div>
+            <div class="col-md-12">
+              <div class="main-grid-banner-coupon-parent">
+                <h3 class="main-grid-banner-coupon-heading"><?php echo esc_html('Get Flat 25% OFF On Premium Themes'); ?></h3>
+                <p class="main-grid-banner-coupon-para"><?php echo esc_html('Use Coupon Code "'); ?><span id="themeCouponCode"><?php echo esc_html('SUNNY25');?></span><?php echo esc_html('" At Check Out'); ?></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="main-grid-card-parent-free-loader"></span>
+        <div class="main-grid-card-parent">
+            <div class="main-grid-card row theme-templates">
+                <?php
+                    if ($themes) {
+                    foreach ($themes as $theme) {
+                        $screenshot = !empty($theme['screenshot_url']) ? esc_url($theme['screenshot_url']) : '';
+                        $name = esc_html($theme['name']);
+                        $version = esc_html($theme['version']);
+                        $slug = esc_attr($theme['slug']);
+                        
+                        $theme_obj = wp_get_theme($slug);
+                        $is_installed = $theme_obj->exists();
+                        $is_active = ($is_installed && $theme_obj->get_stylesheet() === get_stylesheet());
+
+                        ?>
+
+                        <div class="main-grid-card-parent col-lg-4 col-md-6 col-12">
+                        <div class="main-grid-card-parent-inner">
+                            <div class="main-grid-card-parent-inner-image-head">
+                            <img class="main-grid-card-parent-inner-image" src="<?php echo esc_url($screenshot); ?>" width="100" height="100" alt="<?php echo esc_url($name); ?>">
+                            </div>
+                            <div class="main-grid-card-parent-inner-description">
+                            <h3><?php echo esc_html($name); ?></h3>
+                            <h6>Version: <strong><?php echo esc_html($version); ?></strong></h6>
+                            <div class="main-grid-card-parent-inner-button">
+                                <?php if ($is_active): ?>
+                                    <span class="main-grid-card-parent-inner-button-buy installed-btn"><?php echo esc_html('Activated'); ?></span>
+                                <?php elseif ($is_installed): ?>
+                                    <a target="_blank" href="#" data-theme="<?php echo $slug; ?>" class="main-grid-card-parent-inner-button-buy grid-install-free"><?php echo esc_html('Activate'); ?></a>
+                                <?php else: ?>
+                                    <a target="_blank" href="#" data-theme="<?php echo $slug; ?>" class="main-grid-card-parent-inner-button-buy grid-install-free"><?php echo esc_html('Install'); ?></a>
+                                <?php endif; ?>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    <?php }
+                    }
+                ?>
+            </div>
+        </div>
+        <?php if ($total_pages > 1): ?>
+            <div class="main-grid-card-pagination text-center my-2">
+                <?php if ($current_page > 1): ?>
+                    <button class="button pagination-previous-btn" onclick="location.href='<?php echo esc_url(add_query_arg('theme_page', $current_page - 1)); ?>'"><span class="dashicons dashicons-arrow-left-alt2"></span>Previous</button>
+                <?php endif; ?>
+                <span>Page <?php echo $current_page; ?> of <?php echo $total_pages; ?></span>
+                <?php if ($current_page < $total_pages): ?>
+                    <button class="button pagination-next-btn" onclick="location.href='<?php echo esc_url(add_query_arg('theme_page', $current_page + 1)); ?>'">Next<span class="dashicons dashicons-arrow-right-alt2"></span></button>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    <?php }
+
+    public function mizan_importer_handle_free_theme_redirect() {
+        if (get_transient('mizan_importer_free_theme_activation_redirect')) {
+            delete_transient('mizan_importer_free_theme_activation_redirect');
+            wp_redirect(admin_url('admin.php?page=mizandemoimporter-wizard'));
+            exit;
+        }
+    }
+
+    public function mizan_importer_install_and_activate_free_theme() {
+        check_ajax_referer('whizzie_nonce', '_wpnonce');
+
+        // Check user permissions to install free themes.
+        if (!current_user_can('install_themes') || !isset($_POST['theme_domain'])) {
+            wp_send_json_error(array('message' => 'You do not have sufficient permissions to install themes.'));
+        }
+
+        $theme_slug = sanitize_text_field($_POST['theme_domain']);
+
+        include_once ABSPATH . 'wp-admin/includes/theme.php';
+        include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+        // Check if the free theme is already installed
+        $installed_themes = wp_get_themes(array('errors' => true));
+        if (array_key_exists($theme_slug, $installed_themes)) {
+            // If free theme is already installed, check if it's already active
+            $current_theme = wp_get_theme();
+            if ($current_theme->get('TextDomain') === $theme_slug) {
+                // Set a transient or option to handle the redirect
+                set_transient('mizan_importer_free_theme_activation_redirect', true, 30);
+                wp_send_json_success();
+            }
+
+            // If free theme is not activated, activate it
+            switch_theme($theme_slug);
+            // Set a transient or option to handle the redirect
+            set_transient('mizan_importer_free_theme_activation_redirect', true, 30);
+            wp_send_json_success();
+        }
+
+        // If free theme is not installed, proceed with installation
+        $api = themes_api('theme_information', array(
+            'slug'   => $theme_slug,
+            'fields' => array('sections' => false),
+        ));
+
+        if (is_wp_error($api)) {
+            wp_send_json_error(array('message' => 'Theme not found.'));
+        }
+
+        $upgrader = new Theme_Upgrader();
+        ob_start();
+        $install_result = $upgrader->install($api->download_link);
+        ob_end_clean();
+
+        if (is_wp_error($install_result)) {
+            wp_send_json_error(array('message' => 'Theme installation failed.'));
+        }
+
+        // Activate the free theme
+        switch_theme($theme_slug);
+
+        // Set a transient or option to handle the redirect for the free theme
+        set_transient('mizan_importer_free_theme_activation_redirect', true, 30);
+        wp_send_json_success();
+    }
+    // end
+
   /**
   * Make an interface for the wizard
   */

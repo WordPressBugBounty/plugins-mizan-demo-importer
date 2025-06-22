@@ -198,4 +198,30 @@ jQuery(document).ready(function($) {
         
         alert("Coupon code copied to clipboard: " + couponCode);
     });
+
+    $('.grid-install-free').on('click', function(e) {
+        e.preventDefault();
+
+        $('.main-grid-card-parent-free-loader').show();
+        $('.main-grid-card-overlay').show();
+        
+        var install_btn = $(this);
+        var theme_domain = install_btn.data('theme');
+
+        $.ajax({
+            url: mizan_importer_pro_whizzie_params.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'mizan_importer_install_free_theme',
+                theme_domain: theme_domain,
+                _wpnonce: mizan_importer_pro_whizzie_params.wpnonce
+            },
+            success: function(response) {
+                location.reload();
+            },
+            error: function() {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    });
 });
