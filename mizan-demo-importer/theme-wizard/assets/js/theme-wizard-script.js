@@ -287,9 +287,16 @@ var Whizzie = (function($) {
           do_next_step();
         }
         ajax_callback_customizer = function(response) {
-          console.log('response', response);
+          console.log('Full response:', response);
           jQuery('.wz-btn-customizer').attr('href', response.edit_post_link);
-          do_next_step();
+
+          if (mizan_importer_pro_whizzie_params.is_free_theme) {
+            window.location.href = mizan_importer_pro_whizzie_params.redirect_url;
+          }
+          else {
+            // For premium themes - go to next step
+            do_next_step();
+          }
         }
 
         import_widgets();

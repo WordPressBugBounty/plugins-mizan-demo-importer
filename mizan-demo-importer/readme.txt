@@ -2,9 +2,9 @@
 Contributors: mizanthemes
 Tags: website builder, One click demo Import, templates
 Requires at least: 5.2
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.2
-Stable tag: 0.1.2
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,16 @@ After the import is finished, your site will mirror the demo. Open Elementor to 
 
 = 0.1.2 - 2025-22-06 =
 * **Added** -  Free theme installation functionality.
+
+= 0.1.3 - 2025-15-10 =
+* **Fixes** - Minor Fixes.
+
+= 0.1.4 - 2026-20-01 =
+* **Security** - Fixed missing permission checks in AJAX actions.
+
+= 0.1.5 - 2026-04-02 =
+* **Updated** - Get Started Redirection.
+* **Fixes** - Minor Fixes.
 
 The Mizan Demo Importer bundles the following third-party resources:
 
