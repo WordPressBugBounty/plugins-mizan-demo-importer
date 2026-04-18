@@ -987,7 +987,8 @@ class Mizan_Importer_ThemeWhizzie
   public function mizan_importer_pro_templates_api($cursor, $category, $search)
   {
 
-    $endpoint_url = MDI_THEME_LICENCE_ENDPOINT . 'getFilteredProducts';
+    // $endpoint_url = MDI_THEME_LICENCE_ENDPOINT . 'getFilteredProducts';
+    $endpoint_url = MDI_ELEMENTO_THEME_SHOPIFY_LICENCE_ENDPOINT . 'getFilteredProducts';
 
     $remote_post_data = array(
       'collectionHandle' => $category,

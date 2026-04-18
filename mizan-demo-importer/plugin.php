@@ -3,7 +3,7 @@
   Plugin Name:       Mizan Demo Importer
   Plugin URI:        
   Description:       This plugin helps to import demo content using elementor.
-  Version:           0.1.6
+  Version:           0.1.7
   Requires at least: 5.2
   Requires PHP:      7.2
   Author:            mizanthemes
@@ -36,6 +36,8 @@ define( 'MDI_WPEI_SHOPIFY_LICENCE_ENDPOINT', 'https://license.wpelemento.com/api
 define( 'MIZAN_IMPORTER_TEXT_DOMAIN', "mizan-demo-importer" );
 define( 'MIZAN_MAIN_URL', "https://preview.mizanthemes.com/" );
 define( 'MDI_NAME', 'Mizan Demo Importer' );
+
+define( 'MDI_ELEMENTO_THEME_SHOPIFY_LICENCE_ENDPOINT', 'https://license.wpelemento.com/api/public/' );
 
 require MDI_DIR .'theme-wizard/config.php';
 require MDI_DIR .'theme-wizard/mizan-setup-wizard-skip.php';
