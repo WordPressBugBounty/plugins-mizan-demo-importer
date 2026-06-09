@@ -165,8 +165,7 @@ class Mizan_Importer_ThemeWhizzie
 
     $theme_redirect_url = site_url();
     if ($is_free_theme) {
-      $theme_slug = str_replace('-', '_', $theme_text_domain);
-      $theme_redirect_url = admin_url('themes.php?page=' . $theme_slug . '_about&imported=true');
+      $theme_redirect_url = admin_url('themes.php?page=' . $theme_text_domain . '-getting-started&imported=true');
     }
 
     wp_register_script('theme-wizard-script', MDI_URL . 'theme-wizard/assets/js/theme-wizard-script.js', array('jquery'), time());
