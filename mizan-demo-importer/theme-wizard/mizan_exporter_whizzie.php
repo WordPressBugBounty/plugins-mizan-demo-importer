@@ -168,7 +168,7 @@ class Mizan_Importer_ThemeWhizzie
       $theme_redirect_url = admin_url('themes.php?page=' . $theme_text_domain . '-getting-started&imported=true');
     }
 
-    wp_register_script('theme-wizard-script', MDI_URL . 'theme-wizard/assets/js/theme-wizard-script.js', array('jquery'), time());
+    wp_register_script('theme-wizard-script', MDI_URL . 'theme-wizard/assets/js/theme-wizard-script.js', array('jquery'), MDI_VERSION);
     wp_localize_script('theme-wizard-script', 'mizan_importer_pro_whizzie_params', array(
       'ajaxurl' => esc_url(admin_url('admin-ajax.php')),
       'wpnonce' => wp_create_nonce('whizzie_nonce'),
@@ -179,7 +179,7 @@ class Mizan_Importer_ThemeWhizzie
 
     if ($hook == 'toplevel_page_' . $this->page_slug) {
       wp_enqueue_style('theme-wizard-style', MDI_URL . 'theme-wizard/assets/css/theme-wizard-style.css');
-      wp_enqueue_script('notify-js', MDI_URL . '/theme-wizard/assets/js/notify.min.js', array('bootstrap-js'));
+      wp_enqueue_script('notify-js', MDI_URL . '/theme-wizard/assets/js/notify.min.js', array('jquery'));
       wp_enqueue_script('theme-wizard-script');
       wp_localize_script(
         'elementor-exporter-wizard-script',
@@ -757,15 +757,6 @@ class Mizan_Importer_ThemeWhizzie
     </div>
     <?php
   }
-  public function get_step_importer()
-  { ?>
-    <div class="summary">
-      <p>
-        <?php esc_html_e('Thank you for choosing this Mizan Demo Importer Pro Plugin. Using this quick setup wizard, you will be able to configure your new website and get it running in just a few minutes. Just follow these simple steps mentioned in the wizard and get started with your website.', 'mizan-demo-importer'); ?>
-      </p>
-    </div>
-    <?php
-  }
   /**
    * Get the content for the plugins step
    * @return $content Array
@@ -903,13 +894,6 @@ class Mizan_Importer_ThemeWhizzie
     exit;
   }
 
-  public function isAssoc(array $arr)
-  {
-    if (array() === $arr)
-      return false;
-    return array_keys($arr) !== range(0, count($arr) - 1);
-  }
-
   /**
    * Imports the Demo Content
    * @since 1.1.0
@@ -919,8 +903,14 @@ class Mizan_Importer_ThemeWhizzie
   }
   function wz_activate_mizan_importer_pro()
   {
+    if (!check_ajax_referer('whizzie_nonce', 'wpnonce', false)) {
+      wp_send_json_error(array('message' => esc_html__('Nonce verification failed', 'mizan-demo-importer')));
+    }
+    if (!current_user_can('manage_options')) {
+      wp_send_json_error(array('message' => esc_html__('Insufficient permissions. Administrator access required.', 'mizan-demo-importer')));
+    }
     if (defined('GET_PREMIUM_THEME')) {
-      $mizan_importer_pro_license_key = $_POST['mizan_importer_pro_license_key'];
+      $mizan_importer_pro_license_key = isset($_POST['mizan_importer_pro_license_key']) ? sanitize_text_field(wp_unslash($_POST['mizan_importer_pro_license_key'])) : '';
 
       if (
         defined(constant_name: 'MDI_IS_WPELEMENTO_THEME_LICENCE_ENDPOINT') &&
@@ -952,12 +942,14 @@ class Mizan_Importer_ThemeWhizzie
         if ($response_body->status === false) {
           Mizan_Importer_ThemeWhizzie::remove_the_theme_key();
           Mizan_Importer_ThemeWhizzie::set_the_validation_status('false');
+          delete_transient('mdi_license_status_' . md5($mizan_importer_pro_license_key));
           $response = array('status' => false, 'msg' => $response_body->msg);
           wp_send_json($response);
           exit;
         } else {
           Mizan_Importer_ThemeWhizzie::set_the_validation_status('true');
           Mizan_Importer_ThemeWhizzie::set_the_theme_key($mizan_importer_pro_license_key);
+          delete_transient('mdi_license_status_' . md5($mizan_importer_pro_license_key));
           $response = array('status' => true, 'msg' => 'Theme Activated Successfully!');
           wp_send_json($response);
           exit;
@@ -969,8 +961,15 @@ class Mizan_Importer_ThemeWhizzie
   public function mizan_importer_pro_templates_api_category_wise()
   {
 
-    $search_val = isset($_POST['search_val']) ? ($_POST['search_val']) : '';
-    $category_handle = isset($_POST['category_handle']) ? $_POST['category_handle'] : '';
+    if (!check_ajax_referer('whizzie_nonce', 'wpnonce', false)) {
+      wp_send_json_error(array('message' => esc_html__('Nonce verification failed', 'mizan-demo-importer')));
+    }
+    if (!current_user_can('manage_options')) {
+      wp_send_json_error(array('message' => esc_html__('Insufficient permissions. Administrator access required.', 'mizan-demo-importer')));
+    }
+
+    $search_val = isset($_POST['search_val']) ? sanitize_text_field(wp_unslash($_POST['search_val'])) : '';
+    $category_handle = isset($_POST['category_handle']) ? sanitize_text_field(wp_unslash($_POST['category_handle'])) : '';
 
     $themes_arr = $this->mizan_importer_pro_templates_api('', $category_handle, $search_val);
 
@@ -1032,6 +1031,12 @@ class Mizan_Importer_ThemeWhizzie
   public function get_premium_product_categories()
   {
 
+    $transient_key = 'mdi_premium_categories';
+    $cached = get_transient($transient_key);
+    if (false !== $cached) {
+      return $cached;
+    }
+
     $cat_array = array();
 
     $endpoint_url = MDI_THEME_LICENCE_ENDPOINT . 'getCollections';
@@ -1053,15 +1058,25 @@ class Mizan_Importer_ThemeWhizzie
       }
     }
 
+    // Cache successful lookups longer than empty/failed ones so a transient outage self-heals quickly.
+    set_transient($transient_key, $cat_array, $cat_array ? 6 * HOUR_IN_SECONDS : 15 * MINUTE_IN_SECONDS);
+
     return $cat_array;
   }
 
   public function pagination_load_content()
   {
 
-    $search_val = isset($_POST['search_val']) ? ($_POST['search_val']) : '';
-    $cursor = isset($_POST['cursor']) ? ($_POST['cursor']) : '';
-    $category_handle = isset($_POST['category_handle']) ? $_POST['category_handle'] : '';
+    if (!check_ajax_referer('whizzie_nonce', 'wpnonce', false)) {
+      wp_send_json_error(array('message' => esc_html__('Nonce verification failed', 'mizan-demo-importer')));
+    }
+    if (!current_user_can('manage_options')) {
+      wp_send_json_error(array('message' => esc_html__('Insufficient permissions. Administrator access required.', 'mizan-demo-importer')));
+    }
+
+    $search_val = isset($_POST['search_val']) ? sanitize_text_field(wp_unslash($_POST['search_val'])) : '';
+    $cursor = isset($_POST['cursor']) ? sanitize_text_field(wp_unslash($_POST['cursor'])) : '';
+    $category_handle = isset($_POST['category_handle']) ? sanitize_text_field(wp_unslash($_POST['category_handle'])) : '';
 
     $themes_arr = $this->mizan_importer_pro_templates_api($cursor, $category_handle, $search_val);
 
@@ -1201,15 +1216,22 @@ class Mizan_Importer_ThemeWhizzie
       $endpoint = MDI_THEME_LICENCE_ENDPOINT . 'status';
     }
 
-    $body = ['theme_license_key' => $mizan_importer_pro_license_key, 'site_url' => site_url(), 'theme_text_domain' => wp_get_theme()->get('TextDomain')];
-    $body = wp_json_encode($body);
-    $options = ['body' => $body, 'headers' => ['Content-Type' => 'application/json',]];
-    $response = wp_remote_post($endpoint, $options);
-    if (is_wp_error($response)) {
-      // Mizan_Importer_ThemeWhizzie::set_the_validation_status('false');
-    } else {
-      $response_body = wp_remote_retrieve_body($response);
-      $response_body = json_decode($response_body);
+    $license_status_transient_key = 'mdi_license_status_' . md5($mizan_importer_pro_license_key);
+    $response_body = get_transient($license_status_transient_key);
+    if (false === $response_body) {
+      $body = ['theme_license_key' => $mizan_importer_pro_license_key, 'site_url' => site_url(), 'theme_text_domain' => wp_get_theme()->get('TextDomain')];
+      $body = wp_json_encode($body);
+      $options = ['body' => $body, 'headers' => ['Content-Type' => 'application/json',]];
+      $response = wp_remote_post($endpoint, $options);
+      if (is_wp_error($response)) {
+        $response_body = null;
+        // Mizan_Importer_ThemeWhizzie::set_the_validation_status('false');
+      } else {
+        $response_body = json_decode(wp_remote_retrieve_body($response));
+        set_transient($license_status_transient_key, $response_body, HOUR_IN_SECONDS);
+      }
+    }
+    if (null !== $response_body) {
       if (isset($response_body->is_suspended) && $response_body->is_suspended == 1) {
         Mizan_Importer_ThemeWhizzie::set_the_suspension_status('true');
       } else {
@@ -1523,13 +1545,17 @@ class Mizan_Importer_ThemeWhizzie
       ));
     }
 
+    $home_id = 0;
     foreach ($pages_arr as $page) {
       $elementor_template_data = $page['url'];
       $elementor_template_data_title = $page['title'];
       $ishome = $page['ishome'];
       $post_type = $page['post_type'];
       $type = $page['type'];
-      $this->import_inner_pages_data($elementor_template_data, $elementor_template_data_title, $ishome, $post_type, $type);
+      $imported_id = $this->import_inner_pages_data($elementor_template_data, $elementor_template_data_title, $ishome, $post_type, $type);
+      if ($ishome) {
+        $home_id = $imported_id;
+      }
     }
 
     // call theme function start //
@@ -1547,9 +1573,18 @@ class Mizan_Importer_ThemeWhizzie
     );
   }
 
+  function fetch_remote_content($url)
+  {
+    $response = wp_safe_remote_get($url, array('timeout' => 15));
+    if (is_wp_error($response)) {
+      return '';
+    }
+    return wp_remote_retrieve_body($response);
+  }
+
   public function import_inner_pages_data($elementor_template_data, $elementor_template_data_title, $ishome, $post_type, $type)
   {
-    $elementor_template_data_json = file_get_contents($elementor_template_data);
+    $elementor_template_data_json = $this->fetch_remote_content($elementor_template_data);
     // Upload the file first
     $upload_dir = wp_upload_dir();
     $filename = $this->random_string(25) . '.json';
@@ -1597,6 +1632,8 @@ class Mizan_Importer_ThemeWhizzie
         }
       }
     }
+
+    return $home_id;
   }
 
   public function get_elementor_theme_data($json_url, $json_path)

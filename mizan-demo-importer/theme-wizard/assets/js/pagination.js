@@ -16,6 +16,7 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
               action: 'pagination_load_content',
+              wpnonce: mizan_importer_pro_whizzie_params.wpnonce,
               cursor: cursor,
               search_val: search_val,
               category_handle: category_handle
@@ -83,6 +84,7 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
               action: 'templates_api_category_wise',
+              wpnonce: mizan_importer_pro_whizzie_params.wpnonce,
               category_handle: category_handle,
               search_val: search_val
             },
