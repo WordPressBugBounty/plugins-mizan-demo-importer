@@ -3,7 +3,7 @@
   Plugin Name:       Mizan Demo Importer
   Plugin URI:        
   Description:       This plugin helps to import demo content using elementor.
-  Version:           0.2.0
+  Version:           0.2.1
   Requires at least: 5.2
   Requires PHP:      7.2
   Author:            mizanthemes
@@ -31,7 +31,7 @@ define( 'MDI_FILE', __FILE__ );
 define( 'MDI_BASE', plugin_basename( MDI_FILE ) );
 define( 'MDI_DIR', plugin_dir_path( MDI_FILE ) );
 define( 'MDI_URL', plugins_url( '/', MDI_FILE ) );
-define( 'MDI_VERSION', '0.2.0' );
+define( 'MDI_VERSION', '0.2.1' );
 define( 'MDI_THEME_LICENCE_ENDPOINT', 'https://license.mizanthemes.com/api/public/' );
 define( 'MDI_WPEI_SHOPIFY_LICENCE_ENDPOINT', 'https://license.wpelemento.com/api/public/' );
 define( 'MIZAN_IMPORTER_TEXT_DOMAIN', "mizan-demo-importer" );

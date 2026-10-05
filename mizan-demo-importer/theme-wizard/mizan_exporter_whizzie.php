@@ -384,9 +384,9 @@ class Mizan_Importer_ThemeWhizzie
         </div>
         <div class="col-md-12">
           <div class="main-grid-banner-coupon-parent">
-            <h3 class="main-grid-banner-coupon-heading"><?php echo esc_html('Get Flat 25% OFF On Premium Themes'); ?></h3>
+            <h3 class="main-grid-banner-coupon-heading"><?php echo esc_html('Get Flat 20% OFF On Premium Themes'); ?></h3>
             <p class="main-grid-banner-coupon-para"><?php echo esc_html('Use Coupon Code "'); ?><span
-                id="themeCouponCode"><?php echo esc_html('SUNNY25'); ?></span><?php echo esc_html('" At Check Out'); ?></p>
+                id="themeCouponCode"><?php echo esc_html('MAGIC20'); ?></span><?php echo esc_html('" At Check Out'); ?></p>
           </div>
         </div>
       </div>
@@ -835,6 +835,9 @@ class Mizan_Importer_ThemeWhizzie
     if (!check_ajax_referer('whizzie_nonce', 'wpnonce') || empty($_POST['slug'])) {
       wp_send_json_error(array('error' => 1, 'message' => esc_html__('No Slug Found', 'mizan-demo-importer')));
     }
+    if (!current_user_can('activate_plugins')) {
+      wp_send_json_error(array('error' => 1, 'message' => esc_html__('Insufficient permissions. Administrator access required.', 'mizan-demo-importer')));
+    }
     $json = array();
     // send back some json we use to hit up TGM
     $plugins = $this->get_plugins();
@@ -913,7 +916,7 @@ class Mizan_Importer_ThemeWhizzie
       $mizan_importer_pro_license_key = isset($_POST['mizan_importer_pro_license_key']) ? sanitize_text_field(wp_unslash($_POST['mizan_importer_pro_license_key'])) : '';
 
       if (
-        defined(constant_name: 'MDI_IS_WPELEMENTO_THEME_LICENCE_ENDPOINT') &&
+        defined('MDI_IS_WPELEMENTO_THEME_LICENCE_ENDPOINT') &&
         MDI_IS_WPELEMENTO_THEME_LICENCE_ENDPOINT
       ) {
         $endpoint = MDI_WPEI_SHOPIFY_LICENCE_ENDPOINT . 'verifyTheme';
@@ -1110,9 +1113,9 @@ class Mizan_Importer_ThemeWhizzie
         </div>
         <div class="col-md-12">
           <div class="main-grid-banner-coupon-parent">
-            <h3 class="main-grid-banner-coupon-heading"><?php echo esc_html('Get Flat 25% OFF On Premium Themes'); ?></h3>
+            <h3 class="main-grid-banner-coupon-heading"><?php echo esc_html('Get Flat 20% OFF On Premium Themes'); ?></h3>
             <p class="main-grid-banner-coupon-para"><?php echo esc_html('Use Coupon Code "'); ?><span
-                id="themeCouponCode"><?php echo esc_html('SUNNY25'); ?></span><?php echo esc_html('" At Check Out'); ?></p>
+                id="themeCouponCode"><?php echo esc_html('MAGIC20'); ?></span><?php echo esc_html('" At Check Out'); ?></p>
           </div>
         </div>
       </div>
@@ -1416,6 +1419,9 @@ class Mizan_Importer_ThemeWhizzie
       //wp_send_json_error(array('error' => 1, 'message' => esc_html__('No Slug Found')));
       wp_send_json_error(array('error' => 1, 'message' => esc_html__('No Slug Found', 'mizan-demo-importer')));
 
+    }
+    if (!current_user_can('switch_themes')) {
+      wp_send_json_error(array('error' => 1, 'message' => esc_html__('Insufficient permissions. Administrator access required.', 'mizan-demo-importer')));
     }
     $json = array();
     // send back some json we use to hit up TGM

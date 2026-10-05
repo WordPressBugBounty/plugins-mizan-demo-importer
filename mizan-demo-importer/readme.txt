@@ -2,9 +2,9 @@
 Contributors: mizanthemes
 Tags: website builder, One click demo Import, templates
 Requires at least: 5.2
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.2
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -119,6 +119,11 @@ After the import is finished, your site will mirror the demo. Open Elementor to 
 * **Performance** - Switched a raw remote file read to the WordPress HTTP API.
 * **Performance** - Fixed script versioning so browsers can cache plugin JS.
 * **Cleanup** - Removed unused dead code.
+
+= 0.2.1 - 2026-10-03 =
+* **Fixes** - Fixed a fatal parse error on PHP 7.x caused by a PHP 8-only named argument in the license activation handler.
+* **Security** - Added capability checks to the plugin and theme setup AJAX actions.
+* **Update** - Updated coupon code to MAGIC20 (20% OFF).
 
 The Mizan Demo Importer bundles the following third-party resources:
 
